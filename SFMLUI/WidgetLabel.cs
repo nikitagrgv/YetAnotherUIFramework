@@ -7,10 +7,11 @@ namespace SFMLUI;
 
 public class WidgetLabel : Widget
 {
-	private readonly Text _text = new(null, null, 10);
 	private List<Text> _texts = new();
 	private TextWrapMode _textWrap = TextWrapMode.NoWrap;
 	private string _textString = "";
+	private Color _textColor = Color.Black;
+	private uint _fontSize = 10;
 
 	public enum TextWrapMode
 	{
@@ -21,9 +22,14 @@ public class WidgetLabel : Widget
 
 	public Color TextColor
 	{
-		get => _text.FillColor;
-		set => _text.FillColor = value;
+		get => _textColor;
+		set => _textColor = value;
 	}
+
+	bool isBold { get; set; } = false;
+	bool isUnderlined { get; set; } = false;
+	bool isStrikeThrough { get; set; } = false;
+	bool isItalic { get; set; } = false;
 
 	public string Text
 	{
@@ -31,17 +37,16 @@ public class WidgetLabel : Widget
 		set
 		{
 			_textString = value;
-			UpdateString();
 			OuterYoga.MarkDirty();
 		}
 	}
 
 	public uint FontSize
 	{
-		get => _text.CharacterSize;
+		get => _fontSize;
 		set
 		{
-			_text.CharacterSize = value;
+			_fontSize = value;
 			OuterYoga.MarkDirty();
 		}
 	}
@@ -65,7 +70,6 @@ public class WidgetLabel : Widget
 
 	protected override bool HandleStyleChangeEvent(StyleChangeEvent e)
 	{
-		UpdateFont();
 		return base.HandleStyleChangeEvent(e);
 	}
 
@@ -73,13 +77,17 @@ public class WidgetLabel : Widget
 	{
 		base.Draw(painter);
 
+		Font? font = Style?.Font;
+		if (font == null)
+			return;
+
 		if (_texts.Count == 0)
 			return;
 
 		Text first = _texts[0];
 		float offset = -first.GetLocalBounds().Position.Y;
 
-		float lineSpacing = _text.Font.GetLineSpacing(_text.CharacterSize);
+		float lineSpacing = font.GetLineSpacing(FontSize);
 		float curPos = offset;
 		foreach (Text text in _texts)
 		{
@@ -87,11 +95,6 @@ public class WidgetLabel : Widget
 			painter.Draw(text);
 			curPos += lineSpacing;
 		}
-	}
-
-	private void UpdateFont()
-	{
-		_text.Font = Style?.Font;
 	}
 
 	public override bool AcceptsMouse(float x, float y)
@@ -111,11 +114,6 @@ public class WidgetLabel : Widget
 		return false;
 	}
 
-	private void UpdateString()
-	{
-		_text.DisplayedString = _textString;
-	}
-
 	private static YogaSize MeasureFunction(
 		YogaNode node,
 		float width,
@@ -125,64 +123,225 @@ public class WidgetLabel : Widget
 	{
 		WidgetLabel self = (WidgetLabel)node.Data;
 
-		FloatRect bounds = self._text.GetLocalBounds();
+		// Fallback natural bounds if no font or text
+		float retWidth = 0f;
+		float retHeight = 0f;
 
-		float naturalWidth = bounds.Width;
-		float naturalHeight = bounds.Height;
+		List<Text> texts = new List<Text>();
 
-		float retWidth = naturalWidth;
-		float retHeight = naturalHeight;
+		Font? font = self.Style?.Font;
+		string text = self._textString ?? string.Empty;
 
-		List<Text> texts = [];
-		Font? font = self._text.Font;
-		if (font != null)
+		if (font == null || string.IsNullOrEmpty(text))
 		{
-			uint fontSize = self._text.CharacterSize;
-			float lineSpacing = font.GetLineSpacing(fontSize);
-
-			string text = self._textString;
-			float lineWidth = 0;
-
-			StringBuilder curText = new();
-			for (int i = 0; i < text.Length; i++)
+			self._texts = texts;
+			// Apply yoga measure constraints and return zero size (or measured from existing local bounds)
+			switch (widthMode)
 			{
-				float kerning = 0;
-				char cur = text[i];
-				if (i > 0)
-				{
-					char prev = text[i - 1];
-					kerning = font.GetKerning(prev, cur, fontSize);
-				}
-
-				Glyph glyph = font.GetGlyph(cur, fontSize, bold: false, outlineThickness: 0);
-				float advance = glyph.Advance;
-
-				if (lineWidth + kerning + advance > width && curText.Length > 0)
-				{
-					string lineString = curText.ToString();
-					texts.Add(new Text(lineString, font, fontSize));
-
-					curText.Clear();
-					curText.Append(cur);
-					retHeight += lineSpacing;
-					lineWidth = advance;
-				}
-				else
-				{
-					curText.Append(cur);
-					lineWidth += kerning + advance;
-				}
+				case YogaMeasureMode.Exactly: retWidth = width; break;
+				case YogaMeasureMode.AtMost: retWidth = MathF.Min(retWidth, width); break;
 			}
 
-			if (curText.Length > 0)
+			switch (heightMode)
 			{
-				string lineString = curText.ToString();
-				texts.Add(new Text(lineString, font, fontSize));
+				case YogaMeasureMode.Exactly: retHeight = height; break;
+				case YogaMeasureMode.AtMost: retHeight = MathF.Min(retHeight, height); break;
+			}
+
+			return new YogaSize
+			{
+				width = retWidth,
+				height = retHeight
+			};
+		}
+
+		uint fontSize = self.FontSize;
+		bool isBold = self.isBold;
+		bool isUnderlined = self.isUnderlined;
+		bool isStrikeThrough = self.isStrikeThrough;
+		bool isItalic = self.isItalic;
+		float outline = 0f;
+
+		// Letter/line spacing factors: use Text properties if available otherwise default to 1
+		// If your Text object exposes LetterSpacing or LineSpacing factors use them instead of 1f
+		float letterSpacingFactor = 1f;
+		float lineSpacingFactor = 1f;
+
+		// Precompute font metrics like SFML does
+		float whitespaceWidth = font.GetGlyph(' ', fontSize, isBold, outline).Advance;
+		float letterSpacing = (whitespaceWidth / 3f) * (letterSpacingFactor - 1f);
+		whitespaceWidth += letterSpacing;
+		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
+
+		// Layout state
+		float x = 0f;
+		float y = (float)fontSize; // start baseline at char size like SFML
+		uint prevChar = 0;
+
+		// Bounds initialization similar to SFML ensureGeometryUpdate
+		float minX = (float)fontSize;
+		float minY = (float)fontSize;
+		float maxX = 0f;
+		float maxY = 0f;
+
+		StringBuilder curLine = new StringBuilder();
+
+		// Helper function to finish current line (push Text and reset curLine)
+		void FinishLine()
+		{
+			if (curLine.Length > 0)
+			{
+				texts.Add(new Text(curLine.ToString(), font, fontSize));
+				curLine.Clear();
 			}
 		}
 
+		for (int i = 0; i < text.Length; ++i)
+		{
+			char ch = text[i];
+			if (ch == '\r')
+				continue;
+
+			uint cur = ch;
+
+			// apply kerning from previous character
+			x += font.GetKerning((char)prevChar, (char)cur, fontSize);
+
+			// Special handling: whitespace, tab, newline
+			if (ch == ' ' || ch == '\t' || ch == '\n')
+			{
+				// update min/max bounds before we advance
+				minX = MathF.Min(minX, x);
+				minY = MathF.Min(minY, y);
+
+				switch (ch)
+				{
+					case ' ':
+						x += whitespaceWidth;
+						curLine.Append(' ');
+						break;
+					case '\t':
+						x += whitespaceWidth * 4;
+						curLine.Append('\t');
+						break;
+					case '\n':
+						// newline -> push line, advance y, reset x
+						FinishLine();
+
+						// update bounds for end of line
+						maxX = MathF.Max(maxX, x);
+						maxY = MathF.Max(maxY, y);
+
+						y += lineSpacing;
+						x = 0f;
+						// after a newline we reset previous char so kerning does not leak
+						prevChar = 0;
+						continue; // skip the prevChar update at bottom since we already set it
+				}
+
+				// update max bounds after advancing
+				maxX = MathF.Max(maxX, x);
+				maxY = MathF.Max(maxY, y);
+
+				prevChar = cur;
+				continue;
+			}
+
+			// For normal glyphs compute glyph advance and bounds
+			Glyph glyph = font.GetGlyph(ch, fontSize, isBold, outline);
+			float advance = glyph.Advance;
+
+			// If wrapping width given and we would exceed it, break to new line
+			if (width > 0 && x + advance > width && curLine.Length > 0)
+			{
+				// finalize current line
+				FinishLine();
+
+				// update bounds for finished line
+				maxX = MathF.Max(maxX, x);
+				maxY = MathF.Max(maxY, y);
+
+				// move to next line
+				y += lineSpacing;
+				x = 0f;
+
+				// reset kerning behaviour (as in SFML newline)
+				prevChar = 0;
+
+				// start new line with current character (do not advance prevChar yet)
+				// apply kerning from prevChar==0 will be zero
+				// we must append the current character and advance x by glyph.advance later
+				curLine.Append(ch);
+				// update glyph bounds for the new line as below
+			}
+			else
+			{
+				// normal append to current line
+				curLine.Append(ch);
+			}
+
+			// Update bounds using glyph metrics
+			float left = glyph.Bounds.Left;
+			float top = glyph.Bounds.Top;
+			float right = glyph.Bounds.Left + glyph.Bounds.Width;
+			float bottom = glyph.Bounds.Top + glyph.Bounds.Height;
+
+			// Note: SFML accounts for italic shear in x positions when computing min/max.
+			// For layout width/height we can ignore small italic shear or approximate as zero.
+			minX = MathF.Min(minX, x + left);
+			maxX = MathF.Max(maxX, x + right);
+			minY = MathF.Min(minY, y + top);
+			maxY = MathF.Max(maxY, y + bottom);
+
+			// Advance to next char position including letter spacing
+			x += advance + letterSpacing;
+
+			prevChar = cur;
+		}
+
+		// push last line
+		if (curLine.Length > 0)
+		{
+			texts.Add(new Text(curLine.ToString(), font, fontSize));
+		}
+
+		// If no glyphs were processed, set min/max to 0 so width/height become 0
+		if (maxX < minX)
+		{
+			minX = 0f;
+			maxX = 0f;
+		}
+
+		if (maxY < minY)
+		{
+			minY = 0f;
+			maxY = 0f;
+		}
+
+		// If outline or thickness were used you should expand the bounds here similar to SFML.
+		// (Not included by default but easy to add if you track outline thickness)
+
+		// Compute final measured width/height from bounds
+		retWidth = maxX - minX;
+		retHeight = maxY - minY;
+
+		// If there was at least one line but width computed as zero, fallback to width of widest created Text using GetLocalBounds
+		if (retWidth <= 0f && texts.Count > 0)
+		{
+			float fallbackMax = 0f;
+			foreach (var t in texts)
+			{
+				var b = t.GetLocalBounds();
+				fallbackMax = MathF.Max(fallbackMax, b.Width);
+			}
+
+			retWidth = fallbackMax;
+		}
+
+		// store generated line Texts on the widget for rendering
 		self._texts = texts;
 
+		// Apply Yoga measure constraints
 		switch (widthMode)
 		{
 			case YogaMeasureMode.Undefined:
@@ -192,8 +351,6 @@ public class WidgetLabel : Widget
 				break;
 			case YogaMeasureMode.AtMost:
 				retWidth = MathF.Min(retWidth, width);
-				break;
-			default:
 				break;
 		}
 
@@ -207,14 +364,12 @@ public class WidgetLabel : Widget
 			case YogaMeasureMode.AtMost:
 				retHeight = MathF.Min(retHeight, height);
 				break;
-			default:
-				break;
 		}
 
 		return new YogaSize
 		{
-			height = retHeight,
-			width = retWidth
+			width = retWidth,
+			height = retHeight
 		};
 	}
 }
