@@ -293,9 +293,9 @@ public class WidgetLabel : Widget
 		if (retWidth <= 0f && texts.Count > 0)
 		{
 			float fallbackMax = 0f;
-			foreach (var t in texts)
+			foreach (Text t in texts)
 			{
-				var b = t.GetLocalBounds();
+				FloatRect b = t.GetLocalBounds();
 				fallbackMax = MathF.Max(fallbackMax, b.Width);
 			}
 
