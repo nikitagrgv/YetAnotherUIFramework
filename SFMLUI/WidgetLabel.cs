@@ -78,22 +78,19 @@ public class WidgetLabel : Widget
 		base.Draw(painter);
 
 		Font? font = Style?.Font;
-		if (font == null)
+		if (font == null || _texts.Count == 0)
 			return;
 
-		if (_texts.Count == 0)
-			return;
-
-		Text first = _texts[0];
-		float offset = -first.GetLocalBounds().Position.Y;
-
-		float lineSpacing = font.GetLineSpacing(FontSize);
-		float curPos = offset;
-		foreach (Text text in _texts)
+		uint fontSize = FontSize;
+		float lineSpacing = font.GetLineSpacing(fontSize);
+		float curY = 0;
+		foreach (Text line in _texts)
 		{
-			text.Position = new Vector2f(0, curPos);
-			painter.Draw(text);
-			curPos += lineSpacing;
+			FloatRect bounds = line.GetLocalBounds();
+			float yOffset = -bounds.Top;
+			line.Position = new Vector2f(0f, curY + yOffset);
+			painter.Draw(line);
+			curY += lineSpacing;
 		}
 	}
 
