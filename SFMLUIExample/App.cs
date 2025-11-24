@@ -234,7 +234,6 @@ public class App
 
 		var buttonLabel = new WidgetLabel
 		{
-			MinWidth = 70,
 			FillColor = Color.Transparent,
 			TextColor = Color.White,
 			FontSize = 22,
@@ -323,7 +322,6 @@ public class App
 		var longButton = new WidgetButton
 		{
 			FixedWidth = YogaValue.Percent(90),
-			MinWidth = 140,
 			Margin = 10,
 			Padding = 40,
 			AlignSelf = YogaAlign.Center,
@@ -343,7 +341,6 @@ public class App
 
 		var longButtonLabel = new WidgetLabel
 		{
-			MinWidth = 10,
 			MinHeight = 10,
 			FillColor = Color.Transparent,
 			TextColor = Color.White,
@@ -389,7 +386,6 @@ public class App
 
 			var bl = new WidgetLabel
 			{
-				MinWidth = 10,
 				MinHeight = 10,
 				FillColor = Color.Transparent,
 				TextColor = Color.White,
@@ -422,8 +418,6 @@ public class App
 
 			var bl = new WidgetLabel
 			{
-				MinWidth = 10,
-				MinHeight = 10,
 				FillColor = Color.Transparent,
 				TextColor = Color.White,
 				FontSize = 17,
