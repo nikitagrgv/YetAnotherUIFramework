@@ -7,11 +7,13 @@ namespace SFMLUI;
 public class WidgetEditLine : Widget
 {
 	private readonly Text _text = new(null, null, 18);
-	private Font? _customFont;
+	private readonly Text _placeholderText = new(null, null, 18);
 
 	private const float ViewportThresholdLeft = 20;
 	private const float ViewportThresholdRight = 40;
 	private float _textOffset;
+
+	private uint _fontSize = 18;
 
 	private int _selectionBegin;
 	private int _selectionLength;
@@ -73,6 +75,12 @@ public class WidgetEditLine : Widget
 		set => _text.FillColor = value;
 	}
 
+	public Color PlaceholderTextColor
+	{
+		get => _placeholderText.FillColor;
+		set => _placeholderText.FillColor = value;
+	}
+
 	public string Text
 	{
 		get => _textString;
@@ -99,6 +107,12 @@ public class WidgetEditLine : Widget
 			CursorPosition = ToValidCharacterIndex(CursorPosition);
 			SetSelection(SelectionBegin, SelectionLength);
 		}
+	}
+
+	public string PlaceholderText
+	{
+		get => _placeholderText.DisplayedString;
+		set => _placeholderText.DisplayedString = value;
 	}
 
 	public int Length => _textString.Length;
@@ -141,8 +155,14 @@ public class WidgetEditLine : Widget
 
 	public uint FontSize
 	{
-		get => _text.CharacterSize;
-		set => _text.CharacterSize = value;
+		get => _fontSize;
+		set
+		{
+			if (_fontSize == value)
+				return;
+			_text.CharacterSize = value;
+			_placeholderText.CharacterSize = value;
+		}
 	}
 
 	public float CursorWidth { get; set; } = 2;
@@ -174,6 +194,9 @@ public class WidgetEditLine : Widget
 		BorderFocusColor = new Color(53, 116, 240);
 		BorderColor = new Color(110, 110, 110);
 		BorderHoverColor = new Color(140, 140, 140);
+
+		TextColor = Color.White;
+		PlaceholderTextColor = new Color(150, 150, 150);
 
 		FixedHeight = 30;
 		MinWidth = 40;
@@ -533,8 +556,17 @@ public class WidgetEditLine : Widget
 			painter.Draw(_selectionShape);
 		}
 
-		_text.Position = textRect.Position + offset + new Vector2f(0, verticalTextOffset);
-		painter.Draw(_text);
+		Vector2f textPosition = textRect.Position + offset + new Vector2f(0, verticalTextOffset);
+		if (Text.Length > 0)
+		{
+			_text.Position = textPosition;
+			painter.Draw(_text);
+		}
+		else if (!IsFocused && PlaceholderText.Length > 0)
+		{
+			_placeholderText.Position = textPosition;
+			painter.Draw(_placeholderText);
+		}
 
 		if (IsFocused)
 		{
@@ -552,6 +584,7 @@ public class WidgetEditLine : Widget
 	private void UpdateFont()
 	{
 		_text.Font = Style?.Font;
+		_placeholderText.Font = Style?.Font;
 	}
 
 	private void ResetCursor()
