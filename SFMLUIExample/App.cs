@@ -195,6 +195,7 @@ public class App
 		{
 			Margin = 10,
 			Name = "edit line",
+			PlaceholderText = "Type here some text..."
 		};
 		scroll.AddChild(editLine);
 
@@ -202,6 +203,8 @@ public class App
 		{
 			Margin = 10,
 			Name = "edit line",
+			PlaceholderText = "Type here some text...",
+			Text = "spam"
 		};
 		scroll.AddChild(editLine2);
 
