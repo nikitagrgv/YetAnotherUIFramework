@@ -196,7 +196,7 @@ public class WidgetEditLine : Widget
 		BorderHoverColor = new Color(140, 140, 140);
 
 		TextColor = Color.White;
-		PlaceholderTextColor = new Color(150, 150, 150);
+		PlaceholderTextColor = new Color(130, 130, 130);
 
 		FixedHeight = 30;
 		MinWidth = 40;
