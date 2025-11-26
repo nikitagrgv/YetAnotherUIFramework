@@ -31,6 +31,7 @@ public class WidgetLabel : Widget
 	bool IsUnderlined { get; set; } = false;
 	bool IsStrikeThrough { get; set; } = false;
 	bool IsItalic { get; set; } = false;
+	float Outline { get; set; } = 0f;
 
 	public string Text
 	{
@@ -208,7 +209,9 @@ public class WidgetLabel : Widget
 
 		uint fontSize = FontSize;
 		bool isBold = IsBold;
-		float outline = 0f;
+		float italicShear = IsItalic ? 0.209f : 0f; // Hardcoded values from SFML
+		float outline = Outline;
+		
 
 		float letterSpacingFactor = 1f;
 		float lineSpacingFactor = 1f;
