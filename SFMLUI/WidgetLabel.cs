@@ -131,10 +131,8 @@ public class WidgetLabel : Widget
 		float x = 0f;
 		float y = (float)fontSize;
 
-		for (int i = 0; i < text.Length; i++)
+		foreach (char cur in text)
 		{
-			char cur = text[i];
-
 			if (cur == '\r')
 				continue;
 
