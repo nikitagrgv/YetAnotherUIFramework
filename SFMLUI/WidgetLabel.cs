@@ -7,7 +7,7 @@ namespace SFMLUI;
 
 public class WidgetLabel : Widget
 {
-	private List<Text> _texts = new();
+	private List<Text> _textRows = new();
 	private TextWrapMode _textWrap = TextWrapMode.NoWrap;
 	private string _textString = "";
 	private Color _textColor = Color.Black;
@@ -78,13 +78,13 @@ public class WidgetLabel : Widget
 		base.Draw(painter);
 
 		Font? font = Style?.Font;
-		if (font == null || _texts.Count == 0)
+		if (font == null || _textRows.Count == 0)
 			return;
 
 		uint fontSize = FontSize;
 		float lineSpacing = font.GetLineSpacing(fontSize);
 		float curY = 0;
-		foreach (Text line in _texts)
+		foreach (Text line in _textRows)
 		{
 			FloatRect bounds = line.GetLocalBounds();
 			float yOffset = -bounds.Top;
@@ -111,43 +111,21 @@ public class WidgetLabel : Widget
 		return false;
 	}
 
-	private static YogaSize MeasureFunction(
-		YogaNode node,
-		float width,
-		YogaMeasureMode widthMode,
-		float height,
-		YogaMeasureMode heightMode)
+	private static List<Text> WrapText(WidgetLabel self, float maxWidth)
 	{
-		WidgetLabel self = (WidgetLabel)node.Data;
-
-		float retWidth = 0f;
-		float retHeight = 0f;
-
-		List<Text> texts = new List<Text>();
+		List<Text> textRows = new List<Text>();
 
 		Font? font = self.Style?.Font;
-		string text = self._textString ?? string.Empty;
+		string text = self._textString;
 
 		if (font == null || string.IsNullOrEmpty(text))
 		{
-			self._texts = texts;
-			switch (widthMode)
-			{
-				case YogaMeasureMode.Exactly: retWidth = width; break;
-				case YogaMeasureMode.AtMost: retWidth = MathF.Min(retWidth, width); break;
-			}
+			return textRows;
+		}
 
-			switch (heightMode)
-			{
-				case YogaMeasureMode.Exactly: retHeight = height; break;
-				case YogaMeasureMode.AtMost: retHeight = MathF.Min(retHeight, height); break;
-			}
-
-			return new YogaSize
-			{
-				width = retWidth,
-				height = retHeight
-			};
+		if (float.IsPositiveInfinity(maxWidth))
+		{
+			textRows.Add(new Text());
 		}
 
 		uint fontSize = self.FontSize;
@@ -174,13 +152,13 @@ public class WidgetLabel : Widget
 		float maxX = 0f;
 		float maxY = 0f;
 
-		StringBuilder curLine = new StringBuilder();
+		StringBuilder curLine = new();
 
 		void FinishLine()
 		{
 			if (curLine.Length > 0)
 			{
-				texts.Add(new Text(curLine.ToString(), font, fontSize));
+				textRows.Add(new Text(curLine.ToString(), font, fontSize));
 				curLine.Clear();
 			}
 		}
@@ -232,7 +210,7 @@ public class WidgetLabel : Widget
 			Glyph glyph = font.GetGlyph(ch, fontSize, isBold, outline);
 			float advance = glyph.Advance;
 
-			if (width > 0 && x + advance > width && curLine.Length > 0)
+			if (x + advance > maxWidth && curLine.Length > 0)
 			{
 				FinishLine();
 
@@ -268,7 +246,7 @@ public class WidgetLabel : Widget
 
 		if (curLine.Length > 0)
 		{
-			texts.Add(new Text(curLine.ToString(), font, fontSize));
+			textRows.Add(new Text(curLine.ToString(), font, fontSize));
 		}
 
 		if (maxX < minX)
@@ -283,23 +261,20 @@ public class WidgetLabel : Widget
 			maxY = 0f;
 		}
 
+		return textRows;
+	}
 
-		retWidth = maxX - minX;
-		retHeight = maxY - minY;
+	private static YogaSize MeasureFunction(
+		YogaNode node,
+		float width,
+		YogaMeasureMode widthMode,
+		float height,
+		YogaMeasureMode heightMode)
+	{
+		WidgetLabel self = (WidgetLabel)node.Data;
 
-		if (retWidth <= 0f && texts.Count > 0)
-		{
-			float fallbackMax = 0f;
-			foreach (Text t in texts)
-			{
-				FloatRect b = t.GetLocalBounds();
-				fallbackMax = MathF.Max(fallbackMax, b.Width);
-			}
-
-			retWidth = fallbackMax;
-		}
-
-		self._texts = texts;
+		float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
+		List<Text> textRows = WrapText(self, maxWidth);
 
 		switch (widthMode)
 		{
