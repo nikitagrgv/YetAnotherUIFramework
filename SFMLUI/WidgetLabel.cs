@@ -112,11 +112,13 @@ public class WidgetLabel : Widget
 		return false;
 	}
 
-	private FloatRect GetLineRect(string text,
+	private FloatRect GetTextRect(string text,
 		Font font,
 		uint fontSize,
 		float whitespaceWidth,
 		float letterSpacing,
+		float lineSpacing,
+		float italicShear,
 		bool bold,
 		float outline,
 		uint prevChar)
@@ -132,31 +134,63 @@ public class WidgetLabel : Widget
 		for (int i = 0; i < text.Length; i++)
 		{
 			char cur = text[i];
-			Debug.Assert(cur != '\n' && cur != '\r', "Only for single line");
 
-			width += font.GetKerning(prevChar, cur, fontSize);
-			switch (cur)
+			if (cur == '\r')
+				continue;
+
+			x += font.GetKerning(prevChar, cur, fontSize);
+			prevChar = cur;
+
+			if (cur is ' ' or '\t' or '\n')
 			{
-				case ' ': width += whitespaceWidth; break;
-				case '\t': width += whitespaceWidth * 4; break;
-				default:
-				{
-					Glyph glyph = font.GetGlyph(cur, fontSize, bold, outline);
-					if (i == text.Length - 1)
-					{
-						width += glyph.Bounds.Width;
-					}
-					else
-					{
-						width += glyph.Advance + letterSpacing;
-					}
+				minX = Math.Min(minX, x);
+				minY = Math.Min(minY, y);
 
-					break;
+				switch (cur)
+				{
+					case ' ': x += whitespaceWidth; break;
+					case '\t': x += whitespaceWidth * 4; break;
+					case '\n':
+						y += lineSpacing;
+						x = 0;
+						break;
 				}
+
+				maxX = Math.Max(maxX, x);
+				maxY = Math.Max(maxY, y);
+				continue;
 			}
 
-			prevChar = cur;
+			Glyph glyph = font.GetGlyph(cur, fontSize, bold, outlineThickness: 0f);
+
+			FloatRect glyphBounds = glyph.Bounds;
+			float left = glyphBounds.Left;
+			float top = glyphBounds.Top;
+			float right = glyphBounds.Left + glyphBounds.Width;
+			float bottom = glyphBounds.Top + glyphBounds.Height;
+
+			minX = Math.Min(minX, x + left - italicShear * bottom);
+			maxX = Math.Max(maxX, x + right - italicShear * top);
+			minY = Math.Min(minY, y + top);
+			maxY = Math.Max(maxY, y + bottom);
+			x += glyph.Advance + letterSpacing;
 		}
+
+		if (outline != 0)
+		{
+			float outlineWidth = float.Abs(float.Ceiling(outline));
+			minX -= outlineWidth;
+			maxX += outlineWidth;
+			minY -= outlineWidth;
+			maxY += outlineWidth;
+		}
+
+		FloatRect rect = new(
+			minX,
+			minY,
+			maxX - minX,
+			maxY - minY);
+		return rect;
 	}
 
 	private List<string> WrapText(string text, float maxWidth)
