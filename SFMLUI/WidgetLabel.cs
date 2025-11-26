@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Facebook.Yoga;
 using SFML.Graphics;
 using SFML.System;
@@ -26,10 +27,10 @@ public class WidgetLabel : Widget
 		set => _textColor = value;
 	}
 
-	bool isBold { get; set; } = false;
-	bool isUnderlined { get; set; } = false;
-	bool isStrikeThrough { get; set; } = false;
-	bool isItalic { get; set; } = false;
+	bool IsBold { get; set; } = false;
+	bool IsUnderlined { get; set; } = false;
+	bool IsStrikeThrough { get; set; } = false;
+	bool IsItalic { get; set; } = false;
 
 	public string Text
 	{
@@ -111,13 +112,51 @@ public class WidgetLabel : Widget
 		return false;
 	}
 
-	private static List<Text> WrapText(WidgetLabel self, float maxWidth)
+	private FloatRect GetLineRect(string text,
+		Font font,
+		uint fontSize,
+		float whitespaceWidth,
+		float letterSpacing,
+		bool bold,
+		float outline,
+		uint prevChar)
 	{
-		List<Text> textRows = new List<Text>();
+		float width = 0;
+		for (int i = 0; i < text.Length; i++)
+		{
+			char cur = text[i];
+			Debug.Assert(cur != '\n' && cur != '\r', "Only for single line");
 
-		Font? font = self.Style?.Font;
-		string text = self._textString;
+			width += font.GetKerning(prevChar, cur, fontSize);
+			switch (cur)
+			{
+				case ' ': width += whitespaceWidth; break;
+				case '\t': width += whitespaceWidth * 4; break;
+				default:
+				{
+					Glyph glyph = font.GetGlyph(cur, fontSize, bold, outline);
+					if (i == text.Length - 1)
+					{
+						width += glyph.Bounds.Width;
+					}
+					else
+					{
+						width += glyph.Advance + letterSpacing;
+					}
 
+					break;
+				}
+			}
+
+			prevChar = cur;
+		}
+	}
+
+	private List<string> WrapText(string text, float maxWidth)
+	{
+		List<string> textRows = [];
+
+		Font? font = Style?.Font;
 		if (font == null || string.IsNullOrEmpty(text))
 		{
 			return textRows;
@@ -125,14 +164,11 @@ public class WidgetLabel : Widget
 
 		if (float.IsPositiveInfinity(maxWidth))
 		{
-			textRows.Add(new Text());
+			textRows.Add(_textString);
 		}
 
-		uint fontSize = self.FontSize;
-		bool isBold = self.isBold;
-		bool isUnderlined = self.isUnderlined;
-		bool isStrikeThrough = self.isStrikeThrough;
-		bool isItalic = self.isItalic;
+		uint fontSize = FontSize;
+		bool isBold = IsBold;
 		float outline = 0f;
 
 		float letterSpacingFactor = 1f;
@@ -143,14 +179,7 @@ public class WidgetLabel : Widget
 		whitespaceWidth += letterSpacing;
 		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
 
-		float x = 0f;
-		float y = (float)fontSize;
-		uint prevChar = 0;
-
-		float minX = (float)fontSize;
-		float minY = (float)fontSize;
-		float maxX = 0f;
-		float maxY = 0f;
+		float width = 0f;
 
 		StringBuilder curLine = new();
 
@@ -169,58 +198,44 @@ public class WidgetLabel : Widget
 			if (ch == '\r')
 				continue;
 
-			uint cur = ch;
-
-			x += font.GetKerning((char)prevChar, (char)cur, fontSize);
-
-			if (ch == ' ' || ch == '\t' || ch == '\n')
+			if (ch == '\n')
 			{
-				minX = MathF.Min(minX, x);
-				minY = MathF.Min(minY, y);
+				FinishLine();
+				width = 0f;
+				continue;
+			}
 
+			if (curLine.Length > 0)
+				width += font.GetKerning(curLine[^1], ch, fontSize);
+
+			if (ch == ' ' || ch == '\t')
+			{
 				switch (ch)
 				{
 					case ' ':
-						x += whitespaceWidth;
+						width += whitespaceWidth;
 						curLine.Append(' ');
 						break;
 					case '\t':
-						x += whitespaceWidth * 4;
+						width += whitespaceWidth * 4;
 						curLine.Append('\t');
 						break;
-					case '\n':
-						FinishLine();
-
-						maxX = MathF.Max(maxX, x);
-						maxY = MathF.Max(maxY, y);
-
-						y += lineSpacing;
-						x = 0f;
-						prevChar = 0;
-						continue;
 				}
 
-				maxX = MathF.Max(maxX, x);
-				maxY = MathF.Max(maxY, y);
-
-				prevChar = cur;
 				continue;
 			}
 
 			Glyph glyph = font.GetGlyph(ch, fontSize, isBold, outline);
 			float advance = glyph.Advance;
 
-			if (x + advance > maxWidth && curLine.Length > 0)
+			if (width + advance > maxWidth && curLine.Length > 0)
 			{
 				FinishLine();
 
-				maxX = MathF.Max(maxX, x);
-				maxY = MathF.Max(maxY, y);
+				width = MathF.Max(width, width);
 
 				y += lineSpacing;
-				x = 0f;
-
-				prevChar = 0;
+				width = 0f;
 
 				curLine.Append(ch);
 			}
@@ -229,37 +244,14 @@ public class WidgetLabel : Widget
 				curLine.Append(ch);
 			}
 
-			float left = glyph.Bounds.Left;
-			float top = glyph.Bounds.Top;
 			float right = glyph.Bounds.Left + glyph.Bounds.Width;
-			float bottom = glyph.Bounds.Top + glyph.Bounds.Height;
 
-			minX = MathF.Min(minX, x + left);
-			maxX = MathF.Max(maxX, x + right);
-			minY = MathF.Min(minY, y + top);
-			maxY = MathF.Max(maxY, y + bottom);
-
-			x += advance + letterSpacing;
-
-			prevChar = cur;
+			width = MathF.Max(width, width + right);
+			width += advance + letterSpacing;
 		}
 
 		if (curLine.Length > 0)
-		{
-			textRows.Add(new Text(curLine.ToString(), font, fontSize));
-		}
-
-		if (maxX < minX)
-		{
-			minX = 0f;
-			maxX = 0f;
-		}
-
-		if (maxY < minY)
-		{
-			minY = 0f;
-			maxY = 0f;
-		}
+			textRows.Add(curLine.ToString());
 
 		return textRows;
 	}
@@ -274,7 +266,7 @@ public class WidgetLabel : Widget
 		WidgetLabel self = (WidgetLabel)node.Data;
 
 		float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
-		List<Text> textRows = WrapText(self, maxWidth);
+		List<string> textRows = self.WrapText(self._textString, maxWidth);
 
 		switch (widthMode)
 		{
