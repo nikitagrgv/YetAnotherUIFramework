@@ -121,7 +121,14 @@ public class WidgetLabel : Widget
 		float outline,
 		uint prevChar)
 	{
-		float width = 0;
+		float minX = (float)fontSize;
+		float minY = (float)fontSize;
+		float maxX = 0f;
+		float maxY = 0f;
+
+		float x = 0f;
+		float y = (float)fontSize;
+
 		for (int i = 0; i < text.Length; i++)
 		{
 			char cur = text[i];
