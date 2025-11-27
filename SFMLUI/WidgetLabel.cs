@@ -223,14 +223,13 @@ public class WidgetLabel : Widget
 		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
 
 		float width = 0f;
-
 		StringBuilder curLine = new();
 
 		void FinishLine()
 		{
 			if (curLine.Length > 0)
 			{
-				textRows.Add(new Text(curLine.ToString(), font, fontSize));
+				textRows.Add(curLine.ToString());
 				curLine.Clear();
 			}
 		}
