@@ -222,18 +222,6 @@ public class WidgetLabel : Widget
 		whitespaceWidth += letterSpacing;
 		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
 
-		float width = 0f;
-		StringBuilder curLine = new();
-
-		void FinishLine()
-		{
-			if (curLine.Length > 0)
-			{
-				textRows.Add(curLine.ToString());
-				curLine.Clear();
-			}
-		}
-
 		float GetWidth(string t)
 		{
 			FloatRect rect = GetTextRect(t,
@@ -248,6 +236,17 @@ public class WidgetLabel : Widget
 				prevChar: 0
 			);
 			return rect.Width;
+		}
+
+		StringBuilder curLine = new();
+
+		void FinishLine()
+		{
+			if (curLine.Length > 0)
+			{
+				textRows.Add(curLine.ToString());
+				curLine.Clear();
+			}
 		}
 
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
