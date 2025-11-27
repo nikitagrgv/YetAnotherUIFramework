@@ -116,7 +116,59 @@ public class WidgetLabel : Widget
 		return false;
 	}
 
-	private FloatRect GetTextRect(string text, TextMetrics textMetrics, uint prevChar)
+	private struct TextMetrics(
+		Font font,
+		uint fontSize,
+		bool isBold,
+		float italicShear,
+		float outline,
+		float letterSpacingFactor,
+		float lineSpacingFactor,
+		float whitespaceWidth,
+		float letterSpacing,
+		float lineSpacing)
+	{
+		public Font Font { get; set; } = font;
+		public uint FontSize { get; set; } = fontSize;
+		public bool IsBold { get; set; } = isBold;
+		public float ItalicShear { get; set; } = italicShear;
+		public float Outline { get; set; } = outline;
+		public float LetterSpacingFactor { get; set; } = letterSpacingFactor;
+		public float LineSpacingFactor { get; set; } = lineSpacingFactor;
+		public float WhitespaceWidth { get; set; } = whitespaceWidth;
+		public float LetterSpacing { get; set; } = letterSpacing;
+		public float LineSpacing { get; set; } = lineSpacing;
+	}
+
+	private TextMetrics GetTextMetrics(Font font)
+	{
+		uint fontSize = FontSize;
+		bool isBold = IsBold;
+		float italicShear = IsItalic ? 0.209f : 0f; // Hardcoded values from SFML
+		float outline = Outline;
+		float letterSpacingFactor = LetterSpacingFactor;
+		float lineSpacingFactor = LineSpacingFactor;
+
+		float whitespaceWidth = font.GetGlyph(' ', fontSize, isBold, outlineThickness: 0f).Advance;
+		float letterSpacing = (whitespaceWidth / 3f) * (letterSpacingFactor - 1f);
+		whitespaceWidth += letterSpacing;
+		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
+
+		return new TextMetrics(
+			font,
+			fontSize,
+			isBold,
+			italicShear,
+			outline,
+			letterSpacingFactor,
+			lineSpacingFactor,
+			whitespaceWidth,
+			letterSpacing,
+			lineSpacing
+		);
+	}
+
+	private static FloatRect GetTextRect(string text, TextMetrics textMetrics, uint prevChar)
 	{
 		float minX = (float)textMetrics.FontSize;
 		float minY = (float)textMetrics.FontSize;
@@ -187,56 +239,10 @@ public class WidgetLabel : Widget
 		return rect;
 	}
 
-	private struct TextMetrics(
-		Font font,
-		uint fontSize,
-		bool isBold,
-		float italicShear,
-		float outline,
-		float letterSpacingFactor,
-		float lineSpacingFactor,
-		float whitespaceWidth,
-		float letterSpacing,
-		float lineSpacing)
+	private static float GetWidth(string t, TextMetrics textMetrics)
 	{
-		public Font Font { get; set; } = font;
-		public uint FontSize { get; set; } = fontSize;
-		public bool IsBold { get; set; } = isBold;
-		public float ItalicShear { get; set; } = italicShear;
-		public float Outline { get; set; } = outline;
-		public float LetterSpacingFactor { get; set; } = letterSpacingFactor;
-		public float LineSpacingFactor { get; set; } = lineSpacingFactor;
-		public float WhitespaceWidth { get; set; } = whitespaceWidth;
-		public float LetterSpacing { get; set; } = letterSpacing;
-		public float LineSpacing { get; set; } = lineSpacing;
-	}
-
-	private TextMetrics GetTextMetrics(Font font)
-	{
-		uint fontSize = FontSize;
-		bool isBold = IsBold;
-		float italicShear = IsItalic ? 0.209f : 0f; // Hardcoded values from SFML
-		float outline = Outline;
-		float letterSpacingFactor = LetterSpacingFactor;
-		float lineSpacingFactor = LineSpacingFactor;
-
-		float whitespaceWidth = font.GetGlyph(' ', fontSize, isBold, outlineThickness: 0f).Advance;
-		float letterSpacing = (whitespaceWidth / 3f) * (letterSpacingFactor - 1f);
-		whitespaceWidth += letterSpacing;
-		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
-
-		return new TextMetrics(
-			font,
-			fontSize,
-			isBold,
-			italicShear,
-			outline,
-			letterSpacingFactor,
-			lineSpacingFactor,
-			whitespaceWidth,
-			letterSpacing,
-			lineSpacing
-		);
+		FloatRect rect = GetTextRect(t, textMetrics, prevChar: 0);
+		return rect.Width;
 	}
 
 	private List<string> WrapText(string text, TextMetrics textMetrics, float maxWidth)
@@ -249,19 +255,13 @@ public class WidgetLabel : Widget
 			return textRows;
 		}
 
-		float GetWidth(string t)
-		{
-			FloatRect rect = GetTextRect(t, textMetrics, prevChar: 0);
-			return rect.Width;
-		}
-
 		string GetLongestSubstring(string s)
 		{
 			int length = 1;
 			while (length < s.Length)
 			{
 				string substr = s[..length];
-				float w = GetWidth(substr);
+				float w = GetWidth(substr, textMetrics);
 				if (w >= maxWidth)
 					break;
 				++length;
