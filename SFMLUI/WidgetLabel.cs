@@ -252,7 +252,14 @@ public class WidgetLabel : Widget
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		foreach (string line in originalLines)
 		{
-			float w = GetWidth(line);
+			string wrappedLine = line;
+
+			float w = GetWidth(wrappedLine);
+			while (w > maxWidth && wrappedLine.Length > 1)
+			{
+				wrappedLine = wrappedLine.Substring(0, Math.Max(1, wrappedLine.Length / 2));
+				w = GetWidth(wrappedLine);
+			}
 		}
 	}
 
