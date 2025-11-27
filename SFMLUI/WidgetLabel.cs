@@ -383,12 +383,22 @@ public class WidgetLabel : Widget
 		return rect.Width;
 	}
 
+	private static int GetNextWordIndex(string text, int curIndex)
+	{
+		int nextIndex = curIndex + 1;
+		while (nextIndex < text.Length && char.IsLetter(text[nextIndex]))
+			nextIndex++;
+		while (nextIndex < text.Length && char.IsWhiteSpace(text[nextIndex]))
+			nextIndex++;
+		return nextIndex;
+	}
+
 	private static string GetLongestSubstring(string s, TextMetrics textMetrics, float maxWidth)
 	{
 		int length = 0;
 		while (length < s.Length)
 		{
-			int newLength = length + 1;
+			int newLength = GetNextWordIndex(s, length);
 			string substr = s[..newLength];
 			float w = GetWidth(substr, textMetrics);
 			if (w > maxWidth)
