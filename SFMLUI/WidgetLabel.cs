@@ -100,6 +100,11 @@ public class WidgetLabel : Widget
 		{
 			_textRows.Clear();
 			List<string> lines = WrapText(_textString, textMetrics, Width);
+			foreach (string line in lines)
+			{
+				Text t = new(line, font, FontSize);
+				_textRows.Add(t);
+			}
 		}
 
 		float curY = 0;
