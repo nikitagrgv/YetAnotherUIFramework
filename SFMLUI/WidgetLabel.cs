@@ -271,16 +271,18 @@ public class WidgetLabel : Widget
 
 	private static string GetLongestSubstring(string s, TextMetrics textMetrics, float maxWidth)
 	{
-		int length = 1;
+		int length = 0;
 		while (length < s.Length)
 		{
-			string substr = s[..length];
+			int newLength = length + 1;
+			string substr = s[..newLength];
 			float w = GetWidth(substr, textMetrics);
 			if (w >= maxWidth)
 				break;
-			++length;
+			length = newLength;
 		}
 
+		length = int.Max(1, length);
 		return s[..length];
 	}
 
