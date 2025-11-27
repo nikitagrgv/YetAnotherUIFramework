@@ -27,11 +27,14 @@ public class WidgetLabel : Widget
 		set => _textColor = value;
 	}
 
-	bool IsBold { get; set; } = false;
-	bool IsUnderlined { get; set; } = false;
-	bool IsStrikeThrough { get; set; } = false;
-	bool IsItalic { get; set; } = false;
-	float Outline { get; set; } = 0f;
+	// TODO#
+	public bool IsBold { get; set; } = false;
+	public bool IsUnderlined { get; set; } = false;
+	public bool IsStrikeThrough { get; set; } = false;
+	public bool IsItalic { get; set; } = false;
+	public float Outline { get; set; } = 0f;
+	public float LetterSpacingFactor { get; set; } = 1f;
+	public float LineSpacingFactor { get; set; } = 1f;
 
 	public string Text
 	{
@@ -211,12 +214,10 @@ public class WidgetLabel : Widget
 		bool isBold = IsBold;
 		float italicShear = IsItalic ? 0.209f : 0f; // Hardcoded values from SFML
 		float outline = Outline;
-		
+		float letterSpacingFactor = LetterSpacingFactor;
+		float lineSpacingFactor = LineSpacingFactor;
 
-		float letterSpacingFactor = 1f;
-		float lineSpacingFactor = 1f;
-
-		float whitespaceWidth = font.GetGlyph(' ', fontSize, isBold, outline).Advance;
+		float whitespaceWidth = font.GetGlyph(' ', fontSize, isBold, outlineThickness: 0f).Advance;
 		float letterSpacing = (whitespaceWidth / 3f) * (letterSpacingFactor - 1f);
 		whitespaceWidth += letterSpacing;
 		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
