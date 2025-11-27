@@ -73,6 +73,10 @@ public class WidgetLabel : Widget
 	public WidgetLabel()
 	{
 		OuterYoga.SetMeasureFunction(MeasureFunction);
+
+		FillColor = Color.Transparent;
+		TextColor = Color.White;
+		FontSize = 22;
 	}
 
 	protected override bool HandleStyleChangeEvent(StyleChangeEvent e)

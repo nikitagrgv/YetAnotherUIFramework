@@ -131,6 +131,11 @@ public class App
 			FillColor = Color.Blue,
 		};
 		container.AddChild(scroll2);
+		
+		var longText = new WidgetLabel()
+		{
+			
+		}
 
 		var spam = new Widget
 		{
@@ -237,9 +242,6 @@ public class App
 
 		var buttonLabel = new WidgetLabel
 		{
-			FillColor = Color.Transparent,
-			TextColor = Color.White,
-			FontSize = 22,
 			Text = "button",
 			Name = "buttonLabel",
 		};
@@ -345,9 +347,6 @@ public class App
 		var longButtonLabel = new WidgetLabel
 		{
 			MinHeight = 10,
-			FillColor = Color.Transparent,
-			TextColor = Color.White,
-			FontSize = 22,
 			Text = "long button",
 			Name = "longButtonLabel",
 		};
