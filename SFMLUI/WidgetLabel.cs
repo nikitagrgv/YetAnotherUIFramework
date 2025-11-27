@@ -262,7 +262,7 @@ public class WidgetLabel : Widget
 			{
 				string substr = GetLongestSubstring(remaining);
 				textRows.Add(substr);
-				remaining = remaining[..substr.Length];
+				remaining = remaining[substr.Length..];
 			}
 		}
 
