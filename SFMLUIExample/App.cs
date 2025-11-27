@@ -140,32 +140,35 @@ public class App
 			Name = "spam",
 			BorderRadius = 10,
 			BorderWidth = 5,
+			PositionType = YogaPositionType.Absolute,
 			FillColor = new Color(50, 100, 120),
 		};
 		scroll2.AddChild(spam);
 
 		var spam2 = new Widget
 		{
-			Left = -40,
+			Left = 68,
 			Top = 30,
 			FixedWidth = 50,
 			FixedHeight = 50,
 			Margin = 4,
 			Name = "spam2",
 			BorderRadius = 15,
+			PositionType = YogaPositionType.Absolute,
 			FillColor = new Color(120, 150, 10),
 		};
 		scroll2.AddChild(spam2);
 
 		var spam3 = new Widget
 		{
-			Left = -130,
+			Left = 36,
 			Top = 40,
 			FixedWidth = 50,
 			FixedHeight = 100,
 			Margin = 4,
 			Name = "spam3",
 			BorderRadius = 25,
+			PositionType = YogaPositionType.Absolute,
 			FillColor = new Color(10, 200, 100),
 		};
 		scroll2.AddChild(spam3);
