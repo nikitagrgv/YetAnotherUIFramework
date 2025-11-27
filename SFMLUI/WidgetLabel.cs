@@ -254,7 +254,7 @@ public class WidgetLabel : Widget
 			int length = 1;
 			while (length < s.Length)
 			{
-				string substr = s[length..];
+				string substr = s[..length];
 				float w = GetWidth(substr);
 				if (w > maxWidth)
 					break;
