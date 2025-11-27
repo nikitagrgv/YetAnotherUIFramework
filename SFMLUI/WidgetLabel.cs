@@ -208,6 +208,7 @@ public class WidgetLabel : Widget
 		if (float.IsPositiveInfinity(maxWidth))
 		{
 			textRows.Add(_textString);
+			return textRows;
 		}
 
 		uint fontSize = FontSize;
@@ -238,17 +239,6 @@ public class WidgetLabel : Widget
 			return rect.Width;
 		}
 
-		StringBuilder curLine = new();
-
-		void FinishLine()
-		{
-			if (curLine.Length > 0)
-			{
-				textRows.Add(curLine.ToString());
-				curLine.Clear();
-			}
-		}
-
 		string GetLongestSubstring(string s)
 		{
 			int length = 1;
@@ -267,11 +257,16 @@ public class WidgetLabel : Widget
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		foreach (string line in originalLines)
 		{
-			if (string.IsNullOrEmpty(line))
-				continue;
-
-			string substr = GetLongestSubstring(line);
+			string remaining = line;
+			while (remaining.Length > 0)
+			{
+				string substr = GetLongestSubstring(remaining);
+				textRows.Add(substr);
+				remaining = remaining[..substr.Length];
+			}
 		}
+
+		return textRows;
 	}
 
 	private static YogaSize MeasureFunction(
