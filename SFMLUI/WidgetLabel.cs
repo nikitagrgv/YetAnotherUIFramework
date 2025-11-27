@@ -233,69 +233,7 @@ public class WidgetLabel : Widget
 				curLine.Clear();
 			}
 		}
-
-		for (int i = 0; i < text.Length; ++i)
-		{
-			char ch = text[i];
-			if (ch == '\r')
-				continue;
-
-			if (ch == '\n')
-			{
-				FinishLine();
-				width = 0f;
-				continue;
-			}
-
-			if (curLine.Length > 0)
-				width += font.GetKerning(curLine[^1], ch, fontSize);
-
-			if (ch == ' ' || ch == '\t')
-			{
-				switch (ch)
-				{
-					case ' ':
-						width += whitespaceWidth;
-						curLine.Append(' ');
-						break;
-					case '\t':
-						width += whitespaceWidth * 4;
-						curLine.Append('\t');
-						break;
-				}
-
-				continue;
-			}
-
-			Glyph glyph = font.GetGlyph(ch, fontSize, isBold, outline);
-			float advance = glyph.Advance;
-
-			if (width + advance > maxWidth && curLine.Length > 0)
-			{
-				FinishLine();
-
-				width = MathF.Max(width, width);
-
-				y += lineSpacing;
-				width = 0f;
-
-				curLine.Append(ch);
-			}
-			else
-			{
-				curLine.Append(ch);
-			}
-
-			float right = glyph.Bounds.Left + glyph.Bounds.Width;
-
-			width = MathF.Max(width, width + right);
-			width += advance + letterSpacing;
-		}
-
-		if (curLine.Length > 0)
-			textRows.Add(curLine.ToString());
-
-		return textRows;
+		
 	}
 
 	private static YogaSize MeasureFunction(
