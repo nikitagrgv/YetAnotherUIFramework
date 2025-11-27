@@ -266,6 +266,9 @@ public class WidgetLabel : Widget
 	{
 		WidgetLabel self = (WidgetLabel)node.Data;
 
+		float retWidth = 0f;
+		float retHeight = 0f;
+
 		float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
 		List<string> textRows = self.WrapText(self._textString, maxWidth);
 
