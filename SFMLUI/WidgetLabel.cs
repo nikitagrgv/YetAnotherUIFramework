@@ -108,13 +108,18 @@ public class WidgetLabel : Widget
 		}
 
 		float curY = 0;
-		foreach (Text line in _textRows)
+		for (int i = 0; i < _textRows.Count; i++)
 		{
-			FloatRect bounds = line.GetLocalBounds();
-			float yOffset = -bounds.Top;
-			line.Position = new Vector2f(0f, curY + yOffset);
-			painter.Draw(line);
-			curY += lineSpacing;
+			Text row = _textRows[i];
+			FloatRect bounds = row.GetLocalBounds();
+			if (i == 0)
+			{
+				curY = -bounds.Top;
+			}
+
+			row.Position = new Vector2f(0f, curY);
+			painter.Draw(row);
+			curY += textMetrics.LineSpacing;
 		}
 	}
 
