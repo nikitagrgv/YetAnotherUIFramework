@@ -304,21 +304,19 @@ public class WidgetLabel : Widget
 			float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
 			TextMetrics textMetrics = self.GetTextMetrics(font);
 			List<string> textRows = self.WrapText(self._textString, textMetrics, maxWidth);
-			float rowsWidth = 0;
-			float rowsHeight = 0;
 			for (int i = 0; i < textRows.Count; i++)
 			{
 				string row = textRows[i];
 				FloatRect rect = GetTextRect(row, textMetrics, 0);
 
-				rowsWidth = float.Max(rowsWidth, rect.Width);
+				retWidth = float.Max(retWidth, rect.Width);
 				if (i == 0 || i == textRows.Count - 1)
 				{
-					rowsHeight += rect.Height;
+					retHeight += rect.Height;
 				}
 				else
 				{
-					rowsHeight += textMetrics.LineSpacing;
+					retHeight += textMetrics.LineSpacing;
 				}
 			}
 		}
