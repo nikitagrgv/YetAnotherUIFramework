@@ -294,6 +294,9 @@ public class WidgetLabel : Widget
 	{
 		WidgetLabel self = (WidgetLabel)node.Data;
 
+		float retWidth = 0f;
+		float retHeight = 0f;
+
 		Font? font = self.Style?.Font;
 		if (font != null)
 		{
@@ -301,9 +304,6 @@ public class WidgetLabel : Widget
 			TextMetrics textMetrics = self.GetTextMetrics(font);
 			List<string> textRows = self.WrapText(self._textString, textMetrics, maxWidth);
 		}
-
-		float retWidth = 0f;
-		float retHeight = 0f;
 
 		switch (widthMode)
 		{
