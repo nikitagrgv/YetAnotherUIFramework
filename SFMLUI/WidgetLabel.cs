@@ -9,11 +9,24 @@ namespace SFMLUI;
 public class WidgetLabel : Widget
 {
 	private List<Text> _textRows = new();
+
 	private TextWrapMode _textWrap = TextWrapMode.NoWrap;
+
 	private string _textString = "";
-	private Color _textColor = Color.Black;
+
+	private Color _textColor = Color.White;
+
 	private uint _fontSize = 10;
+
 	private bool _needUpdateText = true;
+
+	private bool _isBold = false;
+	private bool _isUnderlined = false;
+	private bool _isStrikeThrough = false;
+	private bool _isItalic = false;
+	private float _outline = 0f;
+	private float _letterSpacingFactor = 1f;
+	private float _lineSpacingFactor = 1f;
 
 	public enum TextWrapMode
 	{
@@ -25,17 +38,82 @@ public class WidgetLabel : Widget
 	public Color TextColor
 	{
 		get => _textColor;
-		set => _textColor = value;
+		set
+		{
+			_textColor = value;
+			_needUpdateText = true;
+		}
 	}
 
-	// TODO#
-	public bool IsBold { get; set; } = false;
-	public bool IsUnderlined { get; set; } = false;
-	public bool IsStrikeThrough { get; set; } = false;
-	public bool IsItalic { get; set; } = false;
-	public float Outline { get; set; } = 0f;
-	public float LetterSpacingFactor { get; set; } = 1f;
-	public float LineSpacingFactor { get; set; } = 1f;
+	public bool IsBold
+	{
+		get => _isBold;
+		set
+		{
+			_isBold = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public bool IsUnderlined
+	{
+		get => _isUnderlined;
+		set
+		{
+			_isUnderlined = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public bool IsStrikeThrough
+	{
+		get => _isStrikeThrough;
+		set
+		{
+			_isStrikeThrough = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public bool IsItalic
+	{
+		get => _isItalic;
+		set
+		{
+			_isItalic = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public float Outline
+	{
+		get => _outline;
+		set
+		{
+			_outline = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public float LetterSpacingFactor
+	{
+		get => _letterSpacingFactor;
+		set
+		{
+			_letterSpacingFactor = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public float LineSpacingFactor
+	{
+		get => _lineSpacingFactor;
+		set
+		{
+			_lineSpacingFactor = value;
+			_needUpdateText = true;
+		}
+	}
 
 	public string Text
 	{
@@ -54,6 +132,7 @@ public class WidgetLabel : Widget
 		set
 		{
 			_fontSize = value;
+			_needUpdateText = true;
 			OuterYoga.MarkDirty();
 		}
 	}
@@ -66,6 +145,7 @@ public class WidgetLabel : Widget
 			if (value == _textWrap)
 				return;
 			_textWrap = value;
+			_needUpdateText = true;
 			OuterYoga.MarkDirty();
 		}
 	}
