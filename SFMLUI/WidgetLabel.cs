@@ -234,7 +234,7 @@ public class WidgetLabel : Widget
 			}
 		}
 
-		float GetWidth(string t, uint prevChar)
+		float GetWidth(string t)
 		{
 			FloatRect rect = GetTextRect(t,
 				font,
@@ -245,7 +245,7 @@ public class WidgetLabel : Widget
 				italicShear,
 				isBold,
 				outline,
-				prevChar
+				prevChar: 0
 			);
 			return rect.Width;
 		}
@@ -253,7 +253,7 @@ public class WidgetLabel : Widget
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		foreach (string line in originalLines)
 		{
-			FloatRect rect = GetRect(line, 0);
+			FloatRect rect = GetWidth(line);
 		}
 	}
 
