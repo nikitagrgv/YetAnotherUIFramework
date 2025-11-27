@@ -332,21 +332,26 @@ public class WidgetLabel : Widget
 			TextMetrics textMetrics = self.GetTextMetrics(font);
 			List<string> textRows = self.WrapText(self._textString, textMetrics, maxWidth);
 
+			float top = 0;
+			float bottom = 0;
 			for (int i = 0; i < textRows.Count; i++)
 			{
 				string row = textRows[i];
 				FloatRect rect = GetTextRect(row, textMetrics, 0);
-
 				retWidth = float.Max(retWidth, rect.Width);
+
+				if (i == 0)
+				{
+					top = rect.Top;
+				}
+
 				if (i == textRows.Count - 1)
 				{
-					retHeight += rect.GetBottom();
-				}
-				else
-				{
-					retHeight += textMetrics.LineSpacing;
+					bottom = i * textMetrics.LineSpacing + rect.GetBottom();
 				}
 			}
+
+			retHeight = bottom - top;
 		}
 
 		switch (widthMode)
