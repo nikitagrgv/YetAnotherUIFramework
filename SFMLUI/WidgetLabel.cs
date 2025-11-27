@@ -348,7 +348,7 @@ public class WidgetLabel : Widget
 
 				if (i == textRows.Count - 1)
 				{
-					bottom = i * textMetrics.LineSpacing + rect.GetBottom();
+					bottom = i * textMetrics.LineSpacing + rect.Top + rect.Height;
 				}
 			}
 
