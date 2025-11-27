@@ -245,6 +245,22 @@ public class WidgetLabel : Widget
 		return rect.Width;
 	}
 
+	private static string GetLongestSubstring(string s, TextMetrics textMetrics, float maxWidth)
+	{
+		int length = 1;
+		while (length < s.Length)
+		{
+			string substr = s[..length];
+			float w = GetWidth(substr, textMetrics);
+			if (w >= maxWidth)
+				break;
+			++length;
+		}
+
+		return s[..length];
+	}
+
+
 	private List<string> WrapText(string text, TextMetrics textMetrics, float maxWidth)
 	{
 		List<string> textRows = [];
@@ -255,28 +271,13 @@ public class WidgetLabel : Widget
 			return textRows;
 		}
 
-		string GetLongestSubstring(string s)
-		{
-			int length = 1;
-			while (length < s.Length)
-			{
-				string substr = s[..length];
-				float w = GetWidth(substr, textMetrics);
-				if (w >= maxWidth)
-					break;
-				++length;
-			}
-
-			return s[..length];
-		}
-
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		foreach (string line in originalLines)
 		{
 			string remaining = line;
 			while (remaining.Length > 0)
 			{
-				string substr = GetLongestSubstring(remaining);
+				string substr = GetLongestSubstring(remaining, textMetrics, maxWidth);
 				textRows.Add(substr);
 				remaining = remaining[substr.Length..];
 			}
