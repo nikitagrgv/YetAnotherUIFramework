@@ -13,6 +13,7 @@ public class WidgetLabel : Widget
 	private string _textString = "";
 	private Color _textColor = Color.Black;
 	private uint _fontSize = 10;
+	private bool _needUpdateText = true;
 
 	public enum TextWrapMode
 	{
@@ -42,6 +43,7 @@ public class WidgetLabel : Widget
 		set
 		{
 			_textString = value;
+			_needUpdateText = true;
 			OuterYoga.MarkDirty();
 		}
 	}
@@ -75,7 +77,14 @@ public class WidgetLabel : Widget
 
 	protected override bool HandleStyleChangeEvent(StyleChangeEvent e)
 	{
+		_needUpdateText = true;
 		return base.HandleStyleChangeEvent(e);
+	}
+
+	protected override bool HandleLayoutChangeEvent(LayoutChangeEvent e)
+	{
+		_needUpdateText = true;
+		return base.HandleLayoutChangeEvent(e);
 	}
 
 	protected override void Draw(IPainter painter)
