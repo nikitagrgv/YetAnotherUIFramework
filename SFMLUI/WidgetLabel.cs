@@ -118,8 +118,8 @@ public class WidgetLabel : Widget
 			}
 
 			row.Position = new Vector2f(0f, curY);
-			painter.Draw(row);
 			curY += textMetrics.LineSpacing;
+			painter.Draw(row);
 		}
 	}
 
