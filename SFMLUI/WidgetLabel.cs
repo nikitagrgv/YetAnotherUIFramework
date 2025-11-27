@@ -108,18 +108,18 @@ public class WidgetLabel : Widget
 			}
 		}
 
-		float curY = 0;
 		for (int i = 0; i < _textRows.Count; i++)
 		{
 			Text row = _textRows[i];
 			FloatRect bounds = row.GetLocalBounds();
+
+			float y = i * textMetrics.LineSpacing;
 			if (i == 0)
 			{
-				curY = -bounds.Top;
+				y -= bounds.Top;
 			}
 
-			row.Position = new Vector2f(-bounds.Left, curY);
-			curY += textMetrics.LineSpacing;
+			row.Position = new Vector2f(-bounds.Left, y);
 			painter.Draw(row);
 		}
 	}
