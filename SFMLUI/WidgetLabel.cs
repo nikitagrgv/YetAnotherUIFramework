@@ -15,6 +15,7 @@ public class WidgetLabel : Widget
 	private string _textString = "";
 
 	private Color _textColor = Color.White;
+	private Color _outlineColor = Color.White;
 
 	private uint _fontSize = 10;
 
@@ -41,6 +42,16 @@ public class WidgetLabel : Widget
 		set
 		{
 			_textColor = value;
+			_needUpdateText = true;
+		}
+	}
+
+	public Color OutlineColor
+	{
+		get => _outlineColor;
+		set
+		{
+			_outlineColor = value;
 			_needUpdateText = true;
 		}
 	}
@@ -185,9 +196,26 @@ public class WidgetLabel : Widget
 			_needUpdateText = false;
 			_textRows.Clear();
 			List<string> lines = WrapText(_textString, textMetrics, Width);
+
+			Text.Styles styles = SFML.Graphics.Text.Styles.Regular;
+			if (IsBold)
+				styles |= SFML.Graphics.Text.Styles.Bold;
+			if (IsItalic)
+				styles |= SFML.Graphics.Text.Styles.Italic;
+			if (IsUnderlined)
+				styles |= SFML.Graphics.Text.Styles.Underlined;
+			if (IsStrikeThrough)
+				styles |= SFML.Graphics.Text.Styles.StrikeThrough;
+
 			foreach (string line in lines)
 			{
 				Text t = new(line, font, FontSize);
+				t.Style = styles;
+				t.OutlineThickness = Outline;
+				t.FillColor = TextColor;
+				t.OutlineColor = OutlineColor;
+				t.LineSpacing = LineSpacingFactor;
+				t.LetterSpacing = LetterSpacingFactor;
 				_textRows.Add(t);
 			}
 		}
