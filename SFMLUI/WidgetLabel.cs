@@ -253,7 +253,7 @@ public class WidgetLabel : Widget
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		foreach (string line in originalLines)
 		{
-			FloatRect rect = GetWidth(line);
+			float w = GetWidth(line);
 		}
 	}
 
