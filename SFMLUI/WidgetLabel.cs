@@ -234,8 +234,27 @@ public class WidgetLabel : Widget
 			}
 		}
 
+		FloatRect GetRect(string t, uint prevChar)
+		{
+			FloatRect rect = GetTextRect(t,
+				font,
+				fontSize,
+				whitespaceWidth,
+				letterSpacing,
+				lineSpacing,
+				italicShear,
+				isBold,
+				outline,
+				prevChar
+			);
+			return rect;
+		}
+
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
-		
+		foreach (string line in originalLines)
+		{
+			FloatRect rect = GetRect(line, 0);
+		}
 	}
 
 	private static YogaSize MeasureFunction(
