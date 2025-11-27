@@ -233,6 +233,8 @@ public class WidgetLabel : Widget
 				curLine.Clear();
 			}
 		}
+
+		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		
 	}
 
