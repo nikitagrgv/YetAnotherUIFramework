@@ -340,7 +340,7 @@ public class WidgetLabel : Widget
 				retWidth = float.Max(retWidth, rect.Width);
 				if (i == textRows.Count - 1)
 				{
-					retHeight += rect.Height;
+					retHeight += rect.GetBottom();
 				}
 				else
 				{
