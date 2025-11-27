@@ -92,11 +92,16 @@ public class WidgetLabel : Widget
 		base.Draw(painter);
 
 		Font? font = Style?.Font;
-		if (font == null || _textRows.Count == 0)
+		if (font == null || _textString.Length == 0)
 			return;
 
-		uint fontSize = FontSize;
-		float lineSpacing = font.GetLineSpacing(fontSize);
+		TextMetrics textMetrics = GetTextMetrics(font);
+		if (_needUpdateText)
+		{
+			_textRows.Clear();
+			List<string> lines = WrapText(_textString, textMetrics, Width);
+		}
+
 		float curY = 0;
 		foreach (Text line in _textRows)
 		{
