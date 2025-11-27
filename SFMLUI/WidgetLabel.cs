@@ -254,11 +254,15 @@ public class WidgetLabel : Widget
 		{
 			string wrappedLine = line;
 
-			float w = GetWidth(wrappedLine);
-			while (w > maxWidth && wrappedLine.Length > 1)
+			int length = wrappedLine.Length;
+			while (length > 1)
 			{
-				wrappedLine = wrappedLine.Substring(0, Math.Max(1, wrappedLine.Length / 2));
-				w = GetWidth(wrappedLine);
+				string substr = wrappedLine[..length];
+				float w = GetWidth(substr);
+				if (w > maxWidth)
+				{
+					length = Math.Max(1, length / 2);
+				}
 			}
 		}
 	}
