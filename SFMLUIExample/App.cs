@@ -131,11 +131,12 @@ public class App
 			FillColor = Color.Blue,
 		};
 		container.AddChild(scroll2);
-		
+
 		var longText = new WidgetLabel()
 		{
-			
-		}
+			Text = "some long text"
+		};
+		scroll2.AddChild(longText);
 
 		var spam = new Widget
 		{
