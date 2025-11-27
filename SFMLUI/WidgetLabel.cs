@@ -116,31 +116,22 @@ public class WidgetLabel : Widget
 		return false;
 	}
 
-	private FloatRect GetTextRect(string text,
-		Font font,
-		uint fontSize,
-		float whitespaceWidth,
-		float letterSpacing,
-		float lineSpacing,
-		float italicShear,
-		bool bold,
-		float outline,
-		uint prevChar)
+	private FloatRect GetTextRect(string text, TextMetrics textMetrics, uint prevChar)
 	{
-		float minX = (float)fontSize;
-		float minY = (float)fontSize;
+		float minX = (float)textMetrics.FontSize;
+		float minY = (float)textMetrics.FontSize;
 		float maxX = 0f;
 		float maxY = 0f;
 
 		float x = 0f;
-		float y = (float)fontSize;
+		float y = (float)textMetrics.FontSize;
 
 		foreach (char cur in text)
 		{
 			if (cur == '\r')
 				continue;
 
-			x += font.GetKerning(prevChar, cur, fontSize);
+			x += textMetrics.Font.GetKerning(prevChar, cur, textMetrics.FontSize);
 			prevChar = cur;
 
 			if (cur is ' ' or '\t' or '\n')
@@ -150,10 +141,10 @@ public class WidgetLabel : Widget
 
 				switch (cur)
 				{
-					case ' ': x += whitespaceWidth; break;
-					case '\t': x += whitespaceWidth * 4; break;
+					case ' ': x += textMetrics.WhitespaceWidth; break;
+					case '\t': x += textMetrics.WhitespaceWidth * 4; break;
 					case '\n':
-						y += lineSpacing;
+						y += textMetrics.LineSpacing;
 						x = 0;
 						break;
 				}
@@ -163,7 +154,8 @@ public class WidgetLabel : Widget
 				continue;
 			}
 
-			Glyph glyph = font.GetGlyph(cur, fontSize, bold, outlineThickness: 0f);
+			Glyph glyph =
+				textMetrics.Font.GetGlyph(cur, textMetrics.FontSize, textMetrics.IsBold, outlineThickness: 0f);
 
 			FloatRect glyphBounds = glyph.Bounds;
 			float left = glyphBounds.Left;
@@ -171,16 +163,16 @@ public class WidgetLabel : Widget
 			float right = glyphBounds.Left + glyphBounds.Width;
 			float bottom = glyphBounds.Top + glyphBounds.Height;
 
-			minX = Math.Min(minX, x + left - italicShear * bottom);
-			maxX = Math.Max(maxX, x + right - italicShear * top);
+			minX = Math.Min(minX, x + left - textMetrics.ItalicShear * bottom);
+			maxX = Math.Max(maxX, x + right - textMetrics.ItalicShear * top);
 			minY = Math.Min(minY, y + top);
 			maxY = Math.Max(maxY, y + bottom);
-			x += glyph.Advance + letterSpacing;
+			x += glyph.Advance + textMetrics.LetterSpacing;
 		}
 
-		if (outline != 0)
+		if (textMetrics.Outline != 0)
 		{
-			float outlineWidth = float.Abs(float.Ceiling(outline));
+			float outlineWidth = float.Abs(float.Ceiling(textMetrics.Outline));
 			minX -= outlineWidth;
 			maxX += outlineWidth;
 			minY -= outlineWidth;
@@ -195,22 +187,32 @@ public class WidgetLabel : Widget
 		return rect;
 	}
 
-	private List<string> WrapText(string text, float maxWidth)
+	private struct TextMetrics(
+		Font font,
+		uint fontSize,
+		bool isBold,
+		float italicShear,
+		float outline,
+		float letterSpacingFactor,
+		float lineSpacingFactor,
+		float whitespaceWidth,
+		float letterSpacing,
+		float lineSpacing)
 	{
-		List<string> textRows = [];
+		public Font Font { get; set; } = font;
+		public uint FontSize { get; set; } = fontSize;
+		public bool IsBold { get; set; } = isBold;
+		public float ItalicShear { get; set; } = italicShear;
+		public float Outline { get; set; } = outline;
+		public float LetterSpacingFactor { get; set; } = letterSpacingFactor;
+		public float LineSpacingFactor { get; set; } = lineSpacingFactor;
+		public float WhitespaceWidth { get; set; } = whitespaceWidth;
+		public float LetterSpacing { get; set; } = letterSpacing;
+		public float LineSpacing { get; set; } = lineSpacing;
+	}
 
-		Font? font = Style?.Font;
-		if (font == null || string.IsNullOrEmpty(text))
-		{
-			return textRows;
-		}
-
-		if (float.IsPositiveInfinity(maxWidth))
-		{
-			textRows.Add(_textString);
-			return textRows;
-		}
-
+	private TextMetrics GetTextMetrics(Font font)
+	{
 		uint fontSize = FontSize;
 		bool isBold = IsBold;
 		float italicShear = IsItalic ? 0.209f : 0f; // Hardcoded values from SFML
@@ -223,19 +225,33 @@ public class WidgetLabel : Widget
 		whitespaceWidth += letterSpacing;
 		float lineSpacing = font.GetLineSpacing(fontSize) * lineSpacingFactor;
 
+		return new TextMetrics(
+			font,
+			fontSize,
+			isBold,
+			italicShear,
+			outline,
+			letterSpacingFactor,
+			lineSpacingFactor,
+			whitespaceWidth,
+			letterSpacing,
+			lineSpacing
+		);
+	}
+
+	private List<string> WrapText(string text, TextMetrics textMetrics, float maxWidth)
+	{
+		List<string> textRows = [];
+
+		if (float.IsPositiveInfinity(maxWidth))
+		{
+			textRows.Add(_textString);
+			return textRows;
+		}
+
 		float GetWidth(string t)
 		{
-			FloatRect rect = GetTextRect(t,
-				font,
-				fontSize,
-				whitespaceWidth,
-				letterSpacing,
-				lineSpacing,
-				italicShear,
-				isBold,
-				outline,
-				prevChar: 0
-			);
+			FloatRect rect = GetTextRect(t, textMetrics, prevChar: 0);
 			return rect.Width;
 		}
 
@@ -278,11 +294,16 @@ public class WidgetLabel : Widget
 	{
 		WidgetLabel self = (WidgetLabel)node.Data;
 
+		Font? font = self.Style?.Font;
+		if (font != null)
+		{
+			float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
+			TextMetrics textMetrics = self.GetTextMetrics(font);
+			List<string> textRows = self.WrapText(self._textString, textMetrics, maxWidth);
+		}
+
 		float retWidth = 0f;
 		float retHeight = 0f;
-
-		float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
-		List<string> textRows = self.WrapText(self._textString, maxWidth);
 
 		switch (widthMode)
 		{
