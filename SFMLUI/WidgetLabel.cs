@@ -277,7 +277,7 @@ public class WidgetLabel : Widget
 			int newLength = length + 1;
 			string substr = s[..newLength];
 			float w = GetWidth(substr, textMetrics);
-			if (w >= maxWidth)
+			if (w > maxWidth)
 				break;
 			length = newLength;
 		}
