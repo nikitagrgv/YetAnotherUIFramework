@@ -117,7 +117,7 @@ public class WidgetLabel : Widget
 				curY = -bounds.Top;
 			}
 
-			row.Position = new Vector2f(0f, curY);
+			row.Position = new Vector2f(-bounds.Left, curY);
 			curY += textMetrics.LineSpacing;
 			painter.Draw(row);
 		}
