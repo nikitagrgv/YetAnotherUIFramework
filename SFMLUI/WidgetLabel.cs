@@ -331,11 +331,21 @@ public class WidgetLabel : Widget
 			float maxWidth = widthMode == YogaMeasureMode.Undefined ? float.PositiveInfinity : width;
 			TextMetrics textMetrics = self.GetTextMetrics(font);
 			List<string> textRows = self.WrapText(self._textString, textMetrics, maxWidth);
-			if (textRows.Count > 0)
+
+			for (int i = 0; i < textRows.Count; i++)
 			{
-				string lastRow = textRows[^1];
-				FloatRect lastRect = GetTextRect(lastRow, textMetrics, 0);
-				retHeight = (textRows.Count - 1) * textMetrics.LineSpacing + lastRect.Height;
+				string row = textRows[i];
+				FloatRect rect = GetTextRect(row, textMetrics, 0);
+
+				retWidth = float.Max(retWidth, rect.Width);
+				if (i == textRows.Count - 1)
+				{
+					retHeight += rect.Height;
+				}
+				else
+				{
+					retHeight += textMetrics.LineSpacing;
+				}
 			}
 		}
 
