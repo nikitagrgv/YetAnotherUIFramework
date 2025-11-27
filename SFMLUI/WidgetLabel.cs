@@ -108,19 +108,20 @@ public class WidgetLabel : Widget
 			}
 		}
 
+		float currentY = 0;
 		for (int i = 0; i < _textRows.Count; i++)
 		{
 			Text row = _textRows[i];
 			FloatRect bounds = row.GetLocalBounds();
 
-			float y = i * textMetrics.LineSpacing;
 			if (i == 0)
 			{
-				y -= bounds.Top;
+				currentY -= bounds.Top;
 			}
 
-			row.Position = new Vector2f(-bounds.Left, y);
+			row.Position = new Vector2f(-bounds.Left, currentY);
 			painter.Draw(row);
+			currentY += textMetrics.LineSpacing;
 		}
 	}
 
