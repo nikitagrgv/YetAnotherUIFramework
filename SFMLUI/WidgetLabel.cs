@@ -335,7 +335,7 @@ public class WidgetLabel : Widget
 			{
 				string lastRow = textRows[^1];
 				FloatRect lastRect = GetTextRect(lastRow, textMetrics, 0);
-				retWidth = (textRows.Count - 1) * textMetrics.LineSpacing + lastRect.Height;
+				retHeight = (textRows.Count - 1) * textMetrics.LineSpacing + lastRect.Height;
 			}
 		}
 
