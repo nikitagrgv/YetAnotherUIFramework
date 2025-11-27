@@ -132,12 +132,6 @@ public class App
 		};
 		container.AddChild(scroll2);
 
-		var longText = new WidgetLabel()
-		{
-			Text = "some long text"
-		};
-		scroll2.AddChild(longText);
-
 		var spam = new Widget
 		{
 			FixedWidth = 100,
@@ -175,6 +169,12 @@ public class App
 			FillColor = new Color(10, 200, 100),
 		};
 		scroll2.AddChild(spam3);
+
+		var longText = new WidgetLabel()
+		{
+			Text = "some long text"
+		};
+		scroll2.AddChild(longText);
 
 		var button = new WidgetButton
 		{
