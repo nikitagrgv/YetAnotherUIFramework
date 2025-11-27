@@ -403,6 +403,8 @@ public class WidgetLabel : Widget
 
 	private List<string> WrapText(string text, TextMetrics textMetrics, float maxWidth)
 	{
+		// TODO: Really shitty algorythm
+
 		List<string> textRows = [];
 
 		if (float.IsPositiveInfinity(maxWidth))
