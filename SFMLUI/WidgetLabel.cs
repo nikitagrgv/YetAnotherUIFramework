@@ -249,48 +249,28 @@ public class WidgetLabel : Widget
 			}
 		}
 
+		string GetLongestSubstring(string s)
+		{
+			int length = 1;
+			while (length < s.Length)
+			{
+				string substr = s[length..];
+				float w = GetWidth(substr);
+				if (w > maxWidth)
+					break;
+				++length;
+			}
+
+			return s[..length];
+		}
+
 		string[] originalLines = text.Replace("\r", string.Empty).Split('\n');
 		foreach (string line in originalLines)
 		{
-			string wrappedLine = line;
+			if (string.IsNullOrEmpty(line))
+				continue;
 
-			int length = wrappedLine.Length;
-			int step = length;
-			while (length > 1)
-			{
-				step = Math.Max(1, step / 2);
-				string substr = wrappedLine[..length];
-				float w = GetWidth(substr);
-				if (w > maxWidth)
-				{
-					length = Math.Max(1, length - step);
-				}
-
-				if (w < maxWidth)
-				{
-					length = Math.Min(wrappedLine.Length, length + step);
-				}
-			}
-
-			while (length < wrappedLine.Length)
-			{
-				string substr = wrappedLine[..length];
-				float w = GetWidth(substr);
-				if (w < maxWidth)
-					length++;
-				else
-					break;
-			}
-
-			while (length > 1)
-			{
-				string substr = wrappedLine[..length];
-				float w = GetWidth(substr);
-				if (w > maxWidth)
-					length--;
-				else
-					break;
-			}
+			string substr = GetLongestSubstring(line);
 		}
 	}
 
