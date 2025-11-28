@@ -392,6 +392,16 @@ public class WidgetLabel : Widget
 		return enumerator.GetLast();
 	}
 
+	private static int GetNextWordIndex(string text, int curIndex)
+	{
+		int nextIndex = curIndex + 1;
+		while (nextIndex < text.Length && char.IsLetter(text[nextIndex]))
+			nextIndex++;
+		while (nextIndex < text.Length && char.IsWhiteSpace(text[nextIndex]))
+			nextIndex++;
+		return nextIndex;
+	}
+
 	private static int GetLongestLength(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
 	{
 		if (wrapMode == TextWrapMode.NoWrap)
@@ -399,51 +409,25 @@ public class WidgetLabel : Widget
 			return s.Length;
 		}
 
-		int maxLength = s.Length;
 		int length = 0;
 		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
-
-		if (wrapMode == TextWrapMode.WordWrap)
+		while (length < s.Length)
 		{
-			while (rectEnumerator.MoveNext())
+			int newLength = wrapMode == TextWrapMode.WordWrap ? GetNextWordIndex(s, length) : length + 1;
+			for (int i = 0; i < newLength - length; i++)
 			{
-				int newLength = length + 1;
-				while (newLength < maxLength && char.IsLetter(s[newLength - 1]))
-				{
-					rectEnumerator.MoveNext();
-					++newLength;
-				}
-
-				while (newLength < maxLength && char.IsWhiteSpace(s[newLength - 1]))
-				{
-					rectEnumerator.MoveNext();
-					++newLength;
-				}
-
-				FloatRect rect = rectEnumerator.Current;
-				if (rect.Width > maxWidth)
-				{
-					break;
-				}
-
-				length = newLength;
+				bool hasNext = rectEnumerator.MoveNext();
+				Debug.Assert(hasNext);
 			}
-		}
-		else
-		{
-			while (rectEnumerator.MoveNext())
+
+			FloatRect rect = rectEnumerator.Current;
+			if (rect.Width > maxWidth)
 			{
-				int newLength = length + 1;
-				FloatRect rect = rectEnumerator.Current;
-				if (rect.Width > maxWidth)
-				{
-					break;
-				}
-
-				length = newLength;
+				break;
 			}
-		}
 
+			length = newLength;
+		}
 
 		return length;
 	}
