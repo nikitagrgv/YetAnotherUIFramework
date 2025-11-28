@@ -306,12 +306,27 @@ public class WidgetLabel : Widget
 		);
 	}
 
-	private static FloatRect GetTextRect(string text, TextMetrics textMetrics, uint prevChar)
+	private static FloatRect GetOutlinedTextRect(float minX,
+		float minY,
+		float maxX,
+		float maxY, float outlineWidth)
+	{
+		FloatRect rect = new(
+			minX - outlineWidth,
+			minY - outlineWidth,
+			maxX - minX + outlineWidth * 2,
+			maxY - minY + outlineWidth * 2);
+		return rect;
+	}
+
+	private static IEnumerator<FloatRect> IterateTextRect(string text, TextMetrics textMetrics, uint prevChar)
 	{
 		float minX = (float)textMetrics.FontSize;
 		float minY = (float)textMetrics.FontSize;
 		float maxX = 0f;
 		float maxY = 0f;
+
+		float outlineWidth = textMetrics.Outline == 0 ? 0 : float.Abs(float.Ceiling(textMetrics.Outline));
 
 		float x = 0f;
 		float y = (float)textMetrics.FontSize;
@@ -319,7 +334,10 @@ public class WidgetLabel : Widget
 		foreach (char cur in text)
 		{
 			if (cur == '\r')
+			{
+				yield return GetOutlinedTextRect(minX, minY, maxX, maxY, outlineWidth);
 				continue;
+			}
 
 			x += textMetrics.Font.GetKerning(prevChar, cur, textMetrics.FontSize);
 			prevChar = cur;
@@ -341,6 +359,7 @@ public class WidgetLabel : Widget
 
 				maxX = Math.Max(maxX, x);
 				maxY = Math.Max(maxY, y);
+				yield return GetOutlinedTextRect(minX, minY, maxX, maxY, outlineWidth);
 				continue;
 			}
 
@@ -358,28 +377,17 @@ public class WidgetLabel : Widget
 			minY = Math.Min(minY, y + top);
 			maxY = Math.Max(maxY, y + bottom);
 			x += glyph.Advance + textMetrics.LetterSpacing;
+			yield return GetOutlinedTextRect(minX, minY, maxX, maxY, outlineWidth);
 		}
+	}
 
-		if (textMetrics.Outline != 0)
-		{
-			float outlineWidth = float.Abs(float.Ceiling(textMetrics.Outline));
-			minX -= outlineWidth;
-			maxX += outlineWidth;
-			minY -= outlineWidth;
-			maxY += outlineWidth;
-		}
-
-		FloatRect rect = new(
-			minX,
-			minY,
-			maxX - minX,
-			maxY - minY);
-		return rect;
+	private static FloatRect GetFullTextRect(string text, TextMetrics textMetrics, uint prevChar)
+	{
 	}
 
 	private static float GetWidth(string t, TextMetrics textMetrics)
 	{
-		FloatRect rect = GetTextRect(t, textMetrics, prevChar: 0);
+		FloatRect rect = GetFullTextRect(t, textMetrics, prevChar: 0);
 		return rect.Width;
 	}
 
@@ -462,7 +470,7 @@ public class WidgetLabel : Widget
 			for (int i = 0; i < textRows.Count; i++)
 			{
 				string row = textRows[i];
-				FloatRect rect = GetTextRect(row, textMetrics, 0);
+				FloatRect rect = GetFullTextRect(row, textMetrics, 0);
 				retWidth = float.Max(retWidth, rect.Width);
 
 				if (i == 0)
