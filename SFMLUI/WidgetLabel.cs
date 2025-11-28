@@ -408,8 +408,7 @@ public class WidgetLabel : Widget
 		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
 		while (rectEnumerator.MoveNext())
 		{
-			int newLength = wrapMode == TextWrapMode.WordWrap ? GetNextWordIndex(s, length) : length + 1;
-
+			int newLength = length + 1;
 			FloatRect rect = rectEnumerator.Current;
 			if (rect.Width > maxWidth)
 			{
