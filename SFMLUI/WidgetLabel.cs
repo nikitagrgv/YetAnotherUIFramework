@@ -409,6 +409,11 @@ public class WidgetLabel : Widget
 
 	private static int GetLongestLength(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
 	{
+		if (wrapMode == TextWrapMode.NoWrap)
+		{
+			return s.Length;
+		}
+
 		int length = 0;
 		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
 
@@ -441,7 +446,7 @@ public class WidgetLabel : Widget
 
 		List<string> textRows = [];
 
-		if (float.IsPositiveInfinity(maxWidth) || TextWrap == TextWrapMode.NoWrap)
+		if (float.IsPositiveInfinity(maxWidth))
 		{
 			textRows.Add(text);
 			return textRows;
