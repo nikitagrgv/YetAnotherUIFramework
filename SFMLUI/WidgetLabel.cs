@@ -8,7 +8,7 @@ namespace SFMLUI;
 
 public class WidgetLabel : Widget
 {
-	private List<Text> _textRows = new();
+	private readonly List<Text> _textRows = new();
 
 	private TextWrapMode _textWrap = TextWrapMode.NoWrap;
 
