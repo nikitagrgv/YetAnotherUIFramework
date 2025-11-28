@@ -392,12 +392,6 @@ public class WidgetLabel : Widget
 		return enumerator.GetLast();
 	}
 
-	private static float GetWidth(string t, TextMetrics textMetrics)
-	{
-		FloatRect rect = GetFullTextRect(t, textMetrics, prevChar: 0);
-		return rect.Width;
-	}
-
 	private static int GetNextWordIndex(string text, int curIndex)
 	{
 		int nextIndex = curIndex + 1;
@@ -411,17 +405,20 @@ public class WidgetLabel : Widget
 	private static string GetLongestSubstring(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
 	{
 		int length = 0;
-		while (length < s.Length)
+		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
+		while (rectEnumerator.MoveNext())
 		{
 			int newLength = wrapMode == TextWrapMode.WordWrap ? GetNextWordIndex(s, length) : length + 1;
-			string substr = s[..newLength];
-			float w = GetWidth(substr, textMetrics);
-			if (w > maxWidth)
+
+			FloatRect rect = rectEnumerator.Current;
+			if (rect.Width > maxWidth)
+			{
 				break;
+			}
+
 			length = newLength;
 		}
 
-		length = int.Max(1, length);
 		return s[..length];
 	}
 
