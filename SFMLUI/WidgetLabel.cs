@@ -431,7 +431,7 @@ public class WidgetLabel : Widget
 
 		if (float.IsPositiveInfinity(maxWidth) || TextWrap == TextWrapMode.NoWrap)
 		{
-			textRows.Add(_textString);
+			textRows.Add(text);
 			return textRows;
 		}
 
