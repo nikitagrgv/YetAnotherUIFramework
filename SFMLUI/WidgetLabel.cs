@@ -392,21 +392,6 @@ public class WidgetLabel : Widget
 		return enumerator.GetLast();
 	}
 
-	private static int GetNextWordIndex(string text, int curIndex)
-	{
-		int nextIndex = curIndex + 1;
-		while (nextIndex < text.Length && char.IsLetter(text[nextIndex]))
-			nextIndex++;
-		while (nextIndex < text.Length && char.IsWhiteSpace(text[nextIndex]))
-			nextIndex++;
-		return nextIndex;
-	}
-
-	private static int MoveToNextWord(string s, int curIndex)
-	{
-		int i = 0;
-	}
-
 	private static int GetLongestLength(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
 	{
 		if (wrapMode == TextWrapMode.NoWrap)
