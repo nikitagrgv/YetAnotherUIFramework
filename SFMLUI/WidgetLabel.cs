@@ -383,6 +383,13 @@ public class WidgetLabel : Widget
 
 	private static FloatRect GetFullTextRect(string text, TextMetrics textMetrics, uint prevChar)
 	{
+		if (string.IsNullOrEmpty(text))
+		{
+			return new FloatRect();
+		}
+
+		IEnumerator<FloatRect> enumerator = IterateTextRect(text, textMetrics, prevChar);
+		return enumerator.GetLast();
 	}
 
 	private static float GetWidth(string t, TextMetrics textMetrics)

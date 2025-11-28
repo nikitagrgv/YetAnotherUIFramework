@@ -20,7 +20,7 @@ public enum Modifier
 	Alt = 1 << 2,
 }
 
-internal class Utils
+internal static partial class Utils
 {
 	public static MouseButton ToMouseButton(Mouse.Button button)
 	{
