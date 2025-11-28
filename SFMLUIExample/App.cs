@@ -361,14 +361,15 @@ public class App
 			BorderRadius = 20,
 			BorderRadiusBottomRight = 60,
 			BorderWidth = 3,
-			Name = "some long button with long text",
+			Name = "long button",
 		};
 		scroll.AddChild(longButton);
 
 		var longButtonLabel = new WidgetLabel
 		{
 			MinHeight = 10,
-			Text = "long button",
+			Text = "some long button with long text",
+			TextWrap = WidgetLabel.TextWrapMode.CharWrap,
 			Name = "longButtonLabel",
 		};
 		longButton.AddChild(longButtonLabel);
