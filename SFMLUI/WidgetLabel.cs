@@ -407,11 +407,25 @@ public class WidgetLabel : Widget
 			while (rectEnumerator.MoveNext())
 			{
 				int newLength = length + 1;
-				while (rectEnumerator.MoveNext() && char.IsLetter(s[newLength]))
-					++newLength;
+				while (rectEnumerator.MoveNext())
+				{
+					if (!char.IsLetter(s[newLength]))
+					{
+						break;
+					}
 
-				while (rectEnumerator.MoveNext() && char.IsWhiteSpace(s[newLength]))
 					++newLength;
+				}
+
+				while (rectEnumerator.MoveNext())
+				{
+					if (!char.IsWhiteSpace(s[newLength]))
+					{
+						break;
+					}
+
+					++newLength;
+				}
 
 				FloatRect rect = rectEnumerator.Current;
 				if (rect.Width > maxWidth)
