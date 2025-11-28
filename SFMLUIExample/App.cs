@@ -361,7 +361,7 @@ public class App
 			BorderRadius = 20,
 			BorderRadiusBottomRight = 60,
 			BorderWidth = 3,
-			Name = "long button",
+			Name = "some long button with long text",
 		};
 		scroll.AddChild(longButton);
 
