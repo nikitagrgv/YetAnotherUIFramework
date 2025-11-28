@@ -454,7 +454,7 @@ public class WidgetLabel : Widget
 				int length = GetLongestLength(remaining, textMetrics, maxWidth, TextWrap);
 				length = Math.Max(1, length);
 				string substr = remaining[..length];
-				textRows.Add(substr);
+				textRows.Add(substr.Trim());
 				remaining = remaining[length..];
 			}
 		}
