@@ -402,7 +402,7 @@ public class WidgetLabel : Widget
 		return nextIndex;
 	}
 
-	private static string GetLongestSubstring(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
+	private static int GetLongestLength(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
 	{
 		int length = 0;
 		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
@@ -419,7 +419,7 @@ public class WidgetLabel : Widget
 			length = newLength;
 		}
 
-		return s[..length];
+		return length;
 	}
 
 
@@ -441,9 +441,11 @@ public class WidgetLabel : Widget
 			string remaining = line;
 			while (remaining.Length > 0)
 			{
-				string substr = GetLongestSubstring(remaining, textMetrics, maxWidth, TextWrap);
+				int length = GetLongestLength(remaining, textMetrics, maxWidth, TextWrap);
+				length = Math.Max(1, length);
+				string substr = remaining[..length];
 				textRows.Add(substr);
-				remaining = remaining[substr.Length..];
+				remaining = remaining[length..];
 			}
 		}
 
