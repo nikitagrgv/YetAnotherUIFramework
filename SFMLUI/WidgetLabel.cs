@@ -429,7 +429,7 @@ public class WidgetLabel : Widget
 
 		List<string> textRows = [];
 
-		if (float.IsPositiveInfinity(maxWidth))
+		if (float.IsPositiveInfinity(maxWidth) || TextWrap == TextWrapMode.NoWrap)
 		{
 			textRows.Add(_textString);
 			return textRows;
