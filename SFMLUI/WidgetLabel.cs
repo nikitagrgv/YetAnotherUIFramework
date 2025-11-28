@@ -419,6 +419,23 @@ public class WidgetLabel : Widget
 
 		if (wrapMode == TextWrapMode.WordWrap)
 		{
+			while (rectEnumerator.MoveNext())
+			{
+				int newLength = length + 1;
+				while (rectEnumerator.MoveNext() && char.IsLetter(s[newLength]))
+					++newLength;
+
+				while (rectEnumerator.MoveNext() && char.IsWhiteSpace(s[newLength]))
+					++newLength;
+
+				FloatRect rect = rectEnumerator.Current;
+				if (rect.Width > maxWidth)
+				{
+					break;
+				}
+
+				length = newLength;
+			}
 		}
 		else
 		{
