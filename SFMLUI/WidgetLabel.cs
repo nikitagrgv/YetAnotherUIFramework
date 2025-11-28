@@ -407,22 +407,24 @@ public class WidgetLabel : Widget
 			while (rectEnumerator.MoveNext())
 			{
 				int newLength = length + 1;
-				while (rectEnumerator.MoveNext())
+				while (char.IsLetter(s[newLength - 1]))
 				{
-					++newLength;
-					if (!char.IsLetter(s[newLength - 1]))
+					if (!rectEnumerator.MoveNext())
 					{
 						break;
 					}
+
+					++newLength;
 				}
 
-				while (rectEnumerator.MoveNext())
+				while (char.IsWhiteSpace(s[newLength - 1]))
 				{
-					++newLength;
-					if (!char.IsWhiteSpace(s[newLength - 1]))
+					if (!rectEnumerator.MoveNext())
 					{
 						break;
 					}
+
+					++newLength;
 				}
 
 				FloatRect rect = rectEnumerator.Current;
