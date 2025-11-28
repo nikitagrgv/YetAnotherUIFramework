@@ -402,21 +402,34 @@ public class WidgetLabel : Widget
 		return nextIndex;
 	}
 
+	private static int MoveToNextWord(string s, int curIndex)
+	{
+		int i = 0;
+	}
+
 	private static int GetLongestLength(string s, TextMetrics textMetrics, float maxWidth, TextWrapMode wrapMode)
 	{
 		int length = 0;
 		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
-		while (rectEnumerator.MoveNext())
-		{
-			int newLength = length + 1;
-			FloatRect rect = rectEnumerator.Current;
-			if (rect.Width > maxWidth)
-			{
-				break;
-			}
 
-			length = newLength;
+		if (wrapMode == TextWrapMode.WordWrap)
+		{
 		}
+		else
+		{
+			while (rectEnumerator.MoveNext())
+			{
+				int newLength = length + 1;
+				FloatRect rect = rectEnumerator.Current;
+				if (rect.Width > maxWidth)
+				{
+					break;
+				}
+
+				length = newLength;
+			}
+		}
+
 
 		return length;
 	}
