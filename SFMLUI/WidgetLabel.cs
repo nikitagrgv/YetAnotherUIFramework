@@ -399,6 +399,7 @@ public class WidgetLabel : Widget
 			return s.Length;
 		}
 
+		int maxLength = s.Length;
 		int length = 0;
 		IEnumerator<FloatRect> rectEnumerator = IterateTextRect(s, textMetrics, prevChar: 0);
 
@@ -407,23 +408,15 @@ public class WidgetLabel : Widget
 			while (rectEnumerator.MoveNext())
 			{
 				int newLength = length + 1;
-				while (char.IsLetter(s[newLength - 1]))
+				while (newLength < maxLength && char.IsLetter(s[newLength - 1]))
 				{
-					if (!rectEnumerator.MoveNext())
-					{
-						break;
-					}
-
+					rectEnumerator.MoveNext();
 					++newLength;
 				}
 
-				while (char.IsWhiteSpace(s[newLength - 1]))
+				while (newLength < maxLength && char.IsWhiteSpace(s[newLength - 1]))
 				{
-					if (!rectEnumerator.MoveNext())
-					{
-						break;
-					}
-
+					rectEnumerator.MoveNext();
 					++newLength;
 				}
 
